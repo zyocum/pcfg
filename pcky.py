@@ -16,9 +16,9 @@ class PCKYParser(object):
     def __init__(self, grammar):
         super(PCKYParser, self).__init__()
         self.grammar = self.load_grammar(grammar)
-        self.index = CodeBook(
-            set(map(Production.lhs, self.grammar.productions()))
-        )
+        self.index = CodeBook({
+            Production.lhs(p) for p in self.grammar.productions()
+        })
     
     def load_grammar(self, grammar_path):
         """Returns a PCFG from the specified file."""
@@ -63,10 +63,8 @@ class PCKYParser(object):
             for i in range(j-2, -1, -1):
                 for k in range(i+1, j):
                     for production in self.nonterminals():
-                        a, b, c = map(
-                            self.index.get,
-                            (production.lhs(),) + production.rhs()
-                        )
+                        a = self.index.get(production.lhs())
+                        b, c = (self.index.get(n) for n in production.rhs())
                         left, right = matrix[i,k,b], matrix[k,j,c]
                         score = production.prob() * left * right
                         # Maximize the parse probability
@@ -123,7 +121,7 @@ class CodeBook(object):
         return len(self.index)
     
     def __repr__(self):
-        return "<%s with %d entries>" % (self.__class__.__name__, len(self))
+        return f'{self.__class__.__name__} with {len(self)} entries'
     
     def add(self, name):
         """Add the given name with a generated index."""
