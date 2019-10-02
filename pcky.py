@@ -84,7 +84,7 @@ class PCKYParser(object):
         the most probable syntactic parse tree rooted at the entry point."""
         a = self.index[root]
         # Base case - lexical productions
-        if root in set(map(Production.lhs, self.terminals())):
+        if root in (Production.lhs(n) for n in self.terminals()):
             return Tree(root, [back[row+1,row+1,a]])
         # Recursive case - nonlexical productions
         else:
